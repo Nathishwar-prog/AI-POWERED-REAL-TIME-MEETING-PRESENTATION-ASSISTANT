@@ -1,0 +1,21 @@
+# Scripted meeting transcript for the "mock" audio source.
+# Format:  [Speaker:] text [@seconds]
+# Blank lines and lines starting with '#' are ignored.
+# A mix of statements (no card expected) and questions (card expected).
+
+Presenter: Thanks everyone for joining, I will walk through the Northwind Analytics briefing. @1.0
+Priya: Sounds good, looking forward to it. @6.0
+Presenter: Let me start with a quick product overview and then pricing. @9.0
+Marcus: What does each pricing tier actually include? @14.0
+Presenter: Good question, let me get to that in a moment. @19.0
+Priya: How much is the Team plan per month? @24.0
+Presenter: I will confirm the exact number shortly. @29.0
+Marcus: That makes sense, thanks. @33.0
+Priya: Can you clarify the refund policy if we cancel after a month? @37.0
+Presenter: Sure, the refund terms are in the briefing. @43.0
+Dev: Where is customer data stored, and is it ever shared? @48.0
+Presenter: Security is covered in its own section. @54.0
+Marcus: Is there a mobile app available yet? @58.0
+Presenter: Let me check the roadmap on that one. @63.0
+Dev: What is the meaning of life? @67.0
+Presenter: Ha, that one is not in my slides. Let us wrap up. @72.0

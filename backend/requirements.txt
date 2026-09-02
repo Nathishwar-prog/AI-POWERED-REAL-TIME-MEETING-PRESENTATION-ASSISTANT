@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic
+pydantic-settings
+python-docx
+faster-whisper
+sentence-transformers
+numpy
+soundfile
+sounddevice
+soundcard
+httpx
+anthropic
+pytest
+pytest-asyncio

@@ -1,0 +1,30 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+backend/data/
+backend/.env
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+*.local
+
+# Secrets / env
+.env
+.env.*
+!.env.example
+
+# Office lock/temp files
+~$*
+
+# Tooling / editor / OS
+.claude/
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
