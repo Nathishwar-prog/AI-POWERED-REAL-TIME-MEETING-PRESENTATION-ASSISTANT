@@ -7,6 +7,7 @@ python-docx
 faster-whisper
 sentence-transformers
 numpy
+faiss-cpu
 soundfile
 sounddevice
 soundcard

@@ -50,6 +50,8 @@ class Settings(BaseSettings):
 
     # --- Retrieval (RAG) ----------------------------------------------------
     embed_model: str = Field(default="all-MiniLM-L6-v2")
+    #: Vector-search backend: "numpy" (default, no extra deps) or "faiss".
+    vector_store: str = Field(default="numpy")
     top_k: int = Field(default=4, ge=1)
     min_score: float = Field(default=0.15, ge=0.0, le=1.0)
     chunk_size: int = Field(default=800, ge=100)

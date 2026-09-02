@@ -1,9 +1,11 @@
-"""An in-memory vector store with brute-force cosine search and disk persistence.
+"""The default in-memory vector store: brute-force cosine search over a NumPy
+matrix, persisted to disk.
 
 For a single uploaded document (hundreds of chunks at most) a NumPy matrix and a
-dot product are faster and far simpler than any vector database.  Each store is
-persisted under ``<data_dir>/<doc_id>/`` as ``vectors.npz`` + ``meta.json`` so it
-survives a server restart.
+dot product are faster and far simpler than any vector database.  A FAISS-backed
+alternative lives in :mod:`app.rag.faiss_store`; the active backend is chosen by
+``settings.vector_store`` via :mod:`app.rag.store_factory`.  Each store is
+persisted under ``<data_dir>/<doc_id>/`` as ``vectors.npz`` + ``meta.json``.
 """
 
 from __future__ import annotations
@@ -14,13 +16,14 @@ from pathlib import Path
 import numpy as np
 
 from app.models import RetrievedChunk
+from app.rag.base_store import VectorStoreBase
 from app.rag.chunker import Chunk
 
 _VECTORS_FILE = "vectors.npz"
 _META_FILE = "meta.json"
 
 
-class VectorStore:
+class VectorStore(VectorStoreBase):
     """Holds chunk vectors plus their text and section titles.
 
     The store assumes every stored vector is already L2-normalized (as produced by

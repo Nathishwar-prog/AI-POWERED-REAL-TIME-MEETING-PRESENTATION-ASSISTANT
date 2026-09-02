@@ -1,7 +1,7 @@
 """Query-time retrieval: embed a question and pull the best document chunks.
 
 The :class:`Retriever` ties an :class:`~app.rag.embeddings.Embedder` to a
-:class:`~app.rag.vector_store.VectorStore` and applies the relevance floor
+:class:`~app.rag.base_store.VectorStoreBase` and applies the relevance floor
 (``settings.min_score``) so that a question the document does not cover simply
 returns nothing instead of forcing an irrelevant "match".
 """
@@ -10,8 +10,8 @@ from __future__ import annotations
 
 from app.config import settings
 from app.models import RetrievedChunk
+from app.rag.base_store import VectorStoreBase
 from app.rag.embeddings import Embedder
-from app.rag.vector_store import VectorStore
 
 
 class Retriever:
@@ -22,7 +22,7 @@ class Retriever:
         embedder: Embedder used for the query. A shared default is created if omitted.
     """
 
-    def __init__(self, store: VectorStore, embedder: Embedder | None = None) -> None:
+    def __init__(self, store: VectorStoreBase, embedder: Embedder | None = None) -> None:
         self._store = store
         self._embedder = embedder or Embedder()
 

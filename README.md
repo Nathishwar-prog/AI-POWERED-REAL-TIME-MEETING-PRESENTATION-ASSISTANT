@@ -41,7 +41,8 @@ or tested in isolation. The whole thing runs locally and can be driven end-to-en
   system-audio capture (WASAPI/CoreAudio loopback — no "Stereo Mix", works with
   Bluetooth), optionally mixed with the local microphone.
 - **Local-first RAG** — `python-docx` parsing, sentence-transformer embeddings and
-  a NumPy cosine index; no vector database, no cloud calls for retrieval.
+  a **pluggable vector backend** (in-memory NumPy cosine index by default, **FAISS**
+  `IndexFlatIP` optional); no managed vector database, no cloud calls for retrieval.
 - **Path to a real Zoom feature** — an in-client side panel is scaffolded behind
   the same interfaces; see the [roadmap](#roadmap).
 - **Tested** — `pytest` suite covering parsing, chunking, retrieval, question
@@ -73,7 +74,7 @@ flowchart LR
 | Audio → text | `backend/app/audio/*` | `Transcriber` / `AudioSource` interfaces. Implementations: scripted mock, recorded file, and live loopback (system audio, `+` mic, or a named device) transcribed with **faster-whisper**. |
 | Utterance assembly | `backend/app/pipeline.py` | Buffers transcript chunks into turns; flushes on sentence punctuation, a silence gap, or a length cap. |
 | Question detection | `backend/app/questions/detector.py` | Pure, rule-based: trailing `?`, leading WH-word / auxiliary / request verb, request phrases — also fires on imperatives ("tell me about…", "walk us through…"). |
-| Retrieval (RAG) | `backend/app/rag/*` | `.docx` → titled sections → overlapping chunks → `all-MiniLM-L6-v2` vectors → in-memory cosine search, persisted under `backend/data/<doc_id>/`. A relevance floor means unrelated speech retrieves nothing. |
+| Retrieval (RAG) | `backend/app/rag/*` | `.docx` → titled sections → overlapping chunks → `all-MiniLM-L6-v2` vectors → cosine search over a pluggable backend (NumPy or FAISS), persisted under `backend/data/<doc_id>/`. A relevance floor means unrelated speech retrieves nothing. |
 | Generation | `backend/app/llm/*` | `LLMClient` interface. A strict "use only these excerpts" prompt; the reply is parsed into answer text + a source section, or marked *not in document*. |
 | Delivery | `backend/app/main.py` `/ws/presenter` | Server pushes `transcript` and `qa` events; the React client renders answer cards. |
 
@@ -88,9 +89,10 @@ flowchart LR
 - **Grounding over fluency.** The retriever applies a similarity floor and the
   generator is instructed to refuse when the document is silent; the UI surfaces
   that state instead of hiding it.
-- **Right-sized infrastructure.** One `.docx` at a time, an in-memory index
-  persisted to disk, `asyncio` tasks instead of a queue/broker. The structure
-  leaves room for multi-tenant/DB later without paying for it now.
+- **Right-sized, swappable infrastructure.** One `.docx` at a time, `asyncio`
+  tasks instead of a queue/broker, and a `VectorStoreBase` interface with a
+  factory — NumPy for the common case, FAISS when the corpus grows — chosen by a
+  single env var. Room for multi-tenant/DB later without paying for it now.
 - **Config, not code.** Every tunable (models, `TOP_K`, thresholds, chunk sizes,
   CORS, provider keys) is an environment variable resolved through one
   `pydantic-settings` module.
@@ -100,7 +102,7 @@ flowchart LR
 | Area | Tools |
 |---|---|
 | Backend | Python 3.11+, FastAPI, Uvicorn, Pydantic / pydantic-settings, WebSockets |
-| Speech / ML | faster-whisper, sentence-transformers, PyTorch, NumPy |
+| Speech / ML | faster-whisper, sentence-transformers, PyTorch, NumPy, FAISS |
 | Audio capture | sounddevice, soundcard (WASAPI/CoreAudio loopback), soundfile |
 | LLM | Anthropic SDK; any OpenAI-compatible API (Groq / Gemini / OpenRouter / Cerebras / Ollama) via `httpx` |
 | Frontend | React 18, TypeScript, Vite, Material UI, Redux Toolkit |
@@ -210,6 +212,7 @@ Everything lives in `backend/app/config.py`, overridable via `backend/.env`
 | `LLM_MODEL` / `LLM_BASE_URL` | — | override model, or point `openai` at a local server |
 | `WHISPER_MODEL` | `base.en` | faster-whisper model |
 | `EMBED_MODEL` | `all-MiniLM-L6-v2` | sentence-transformers model |
+| `VECTOR_STORE` | `numpy` | retrieval backend — `numpy` or `faiss` |
 | `TOP_K` / `MIN_SCORE` | `4` / `0.15` | chunks retrieved per question / relevance floor |
 | `CORS_ORIGINS` | `http://localhost:5173` | allowed browser origins |
 
@@ -232,10 +235,10 @@ cd backend && python -m pytest        # unit + integration, no network
 cd frontend && npm run build          # type-checks the whole app
 ```
 
-Coverage spans docx parsing, section-aware chunking, the cosine vector store,
-retrieval thresholds, question detection (positive/negative tables), the audio
-mixer, the OpenAI-compatible client (mocked HTTP), and a full
-`MeetingSession` run driven by a scripted transcript.
+Coverage spans docx parsing, section-aware chunking, both vector-store backends
+(NumPy + FAISS) and the backend factory, retrieval thresholds, question detection
+(positive/negative tables), the audio mixer, the OpenAI-compatible client (mocked
+HTTP), and a full `MeetingSession` run driven by a scripted transcript.
 
 ## Project structure
 
@@ -244,7 +247,7 @@ backend/
   app/
     audio/        AudioSource / Transcriber interfaces + mock, file, loopback, mixer
     questions/    rule-based question detection
-    rag/          docx loading, chunking, embeddings, vector store, retriever
+    rag/          docx loading, chunking, embeddings, vector stores (numpy/faiss), retriever
     llm/          LLMClient interface + Claude / OpenAI-compatible / echo + factory
     pipeline.py   MeetingSession — the orchestrator
     runtime.py    process state: presenter hub + active session

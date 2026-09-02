@@ -13,11 +13,12 @@ from pathlib import Path
 
 from app.config import settings
 from app.models import DocumentInfo
+from app.rag.base_store import VectorStoreBase
 from app.rag.chunker import chunk_sections
 from app.rag.docx_loader import load_docx
 from app.rag.embeddings import Embedder
 from app.rag.retriever import Retriever
-from app.rag.vector_store import VectorStore
+from app.rag.store_factory import create_vector_store
 
 
 def _doc_id_for(data: bytes) -> str:
@@ -31,7 +32,7 @@ class DocumentRegistry:
     def __init__(self, embedder: Embedder | None = None) -> None:
         self._embedder = embedder or Embedder()
         self._active_doc_id: str | None = None
-        self._active_store: VectorStore | None = None
+        self._active_store: VectorStoreBase | None = None
 
     # -- ingestion ------------------------------------------------------
     def ingest_bytes(self, data: bytes, *, filename: str = "upload.docx") -> DocumentInfo:
@@ -58,7 +59,7 @@ class DocumentRegistry:
         chunks = chunk_sections(sections)
         vectors = self._embedder.encode([chunk.text for chunk in chunks])
 
-        store = VectorStore()
+        store = create_vector_store()
         store.add(chunks, vectors)
         store.save(doc_dir)
 
