@@ -22,6 +22,10 @@ frontend/.env
 # Office lock/temp files
 ~$*
 
+# Personal documents dropped in the repo root (e.g. resumes) - never publish these
+/*.docx
+/*.pdf
+
 # Tooling / editor / OS
 .claude/
 .DS_Store
