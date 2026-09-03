@@ -117,7 +117,7 @@ export default function QaCard({ card }: { card: QaCardModel }) {
                 borderColor: "divider",
                 borderRadius: 2,
                 overflow: "hidden",
-                bgcolor: "#fbfbfd",
+                bgcolor: "#F8F5EE",
               }}
             >
               <AccordionSummary expandIcon={<ExpandMoreIcon />} sx={{ minHeight: 44 }}>

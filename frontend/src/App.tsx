@@ -46,7 +46,8 @@ export default function App() {
               display: "grid",
               placeItems: "center",
               color: "#fff",
-              background: "linear-gradient(135deg, #6366f1, #0ea5e9)",
+              background: "linear-gradient(135deg, #6E97B6, #17293F)",
+              boxShadow: "0 6px 16px rgba(23,41,63,0.28)",
             }}
           >
             <AutoAwesomeIcon sx={{ fontSize: 20 }} />

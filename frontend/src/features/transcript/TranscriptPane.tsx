@@ -44,7 +44,7 @@ export default function TranscriptPane() {
             maxHeight: 200,
             overflowY: "auto",
             borderRadius: 2,
-            bgcolor: "#f8f9fb",
+            bgcolor: "#F7F4EC",
             border: "1px solid",
             borderColor: "divider",
             fontSize: 13,
