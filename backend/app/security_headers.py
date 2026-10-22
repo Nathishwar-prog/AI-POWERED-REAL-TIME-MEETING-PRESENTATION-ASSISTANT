@@ -44,7 +44,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
     async def dispatch(self, request: Request, call_next) -> Response:
         response = await call_next(request)
-        response.headers.setdefault("Content-Security-Policy", self._csp)
+        # Don't apply restrictive CSP on /docs or /redoc so Swagger UI / ReDoc can load CDN assets and inline scripts
+        if not request.url.path.startswith(("/docs", "/redoc")):
+            response.headers.setdefault("Content-Security-Policy", self._csp)
         response.headers.setdefault(
             "Strict-Transport-Security", "max-age=31536000; includeSubDomains"
         )
